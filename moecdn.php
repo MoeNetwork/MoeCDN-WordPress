@@ -45,7 +45,7 @@ class MoeCDN {
 		foreach (self::$options as $key => $value) {
 			if ($value) {
 				ob_start(array('MoeCDN', 'replace_' . $key));
-				self::$buffer_count++
+				self::$buffer_count++;
 			}
 		}
 	}
