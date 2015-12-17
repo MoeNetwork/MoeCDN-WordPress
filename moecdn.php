@@ -45,7 +45,7 @@ class MoeCDN {
 		$buffer = str_replace(array("fonts.googleapis.com"), "cdn.moefont.com/fonts", $buffer);
 		$buffer = str_replace(array("ajax.googleapis.com"), "cdn.moefont.com/ajax", $buffer);
 		
-		$buffer = str_replace(array("s.w.org"), "cdn.moefont.com/worg", $buffer);
+		$buffer = str_replace(array("\\/\\/s.w.org"), "\\/\\/cdn.moefont.com\\/worg", $buffer);
 		
 		$buffer = str_replace(array("s0.wp.com", "s1.wp.com"), "cdn.moefont.com/wpcom", $buffer);
 		
