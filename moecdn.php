@@ -20,15 +20,29 @@ class MoeCDN {
 		if (!is_array(self::$options))
 			self::reset_options();
 		self::init();
-    }
+	}
     
 	protected static function init() {
 		add_action('admin_init', array('MoeCDN', 'options_init'));
 		add_action('admin_menu', array('MoeCDN', 'options_menu'));
-		add_action('admin_notices', array('MoeCDN', 'options_notice'));
 		
-		add_action('init', array('MoeCDN', 'buffer_start'));
-		add_action('shutdown', array('MoeCDN', 'buffer_end'));
+		if (is_admin()) {
+			add_action('init', array('MoeCDN', 'buffer_start'), 1);
+			add_action('admin_head', array('MoeCDN', 'buffer_end'), 99999);
+			
+			add_filter('get_avatar', array('MoeCDN', 'replace'));
+			
+			add_action('wp_footer', array('MoeCDN', 'buffer_start'), 1);
+			add_action('shutdown', array('MoeCDN', 'buffer_end'), 99999);
+		} else {
+			add_action('init', array('MoeCDN', 'buffer_start'), 1);
+			add_action('wp_head', array('MoeCDN', 'buffer_end'), 99999);
+			
+			add_filter('get_avatar', array('MoeCDN', 'replace'));
+			
+			add_action('admin_footer', array('MoeCDN', 'buffer_start'), 1);
+			add_action('shutdown', array('MoeCDN', 'buffer_end'), 99999);
+		}
 	}
 	
 	// 缓冲替换输出
@@ -38,18 +52,28 @@ class MoeCDN {
 	public static function buffer_end() {
 		ob_end_flush();
 	}
-	protected static function replace($buffer) {
-		$buffer = str_replace(array("www.gravatar.com", "0.gravatar.com", "1.gravatar.com", "2.gravatar.com"), "gravatar.moefont.com", $buffer);
-		$buffer = str_replace(array("secure.gravatar.com"), "gravatar-ssl.moefont.com", $buffer);
+	// 替换内容
+	public static function replace($content) {
+		if (self::$options['gravatar']) {
+			$content = str_replace(array("//gravatar.com", "//www.gravatar.com", "//0.gravatar.com", "//1.gravatar.com", "//2.gravatar.com"), "//gravatar.moefont.com", $content);
+			$content = str_replace(array("//secure.gravatar.com"), "//gravatar-ssl.moefont.com", $content);
+		}
 		
-		$buffer = str_replace(array("fonts.googleapis.com"), "cdn.moefont.com/fonts", $buffer);
-		$buffer = str_replace(array("ajax.googleapis.com"), "cdn.moefont.com/ajax", $buffer);
+		if (self::$options['googleapis']) {
+			$content = str_replace(array("//fonts.googleapis.com"), "//cdn.moefont.com/fonts", $content);
+			$content = str_replace(array("//ajax.googleapis.com"), "//cdn.moefont.com/ajax", $content);
+		}
 		
-		$buffer = str_replace(array("\\/\\/s.w.org"), "\\/\\/cdn.moefont.com\\/worg", $buffer);
+		if (self::$options['worg']) {
+			$content = str_replace(array("\\/\\/s.w.org"), "\\/\\/cdn.moefont.com\\/worg", $content);
+			$content = str_replace(array("//s.w.org"), "//cdn.moefont.com/worg", $content);
+		}
 		
-		$buffer = str_replace(array("s0.wp.com", "s1.wp.com"), "cdn.moefont.com/wpcom", $buffer);
+		if (self::$options['wpcom']) {
+			$content = str_replace(array("//s0.wp.com", "//s1.wp.com"), "//cdn.moefont.com/wpcom", $content);
+		}
 		
-		return $buffer;
+		return $content;
 	}
 	
 	// 设置页面
@@ -70,37 +94,68 @@ class MoeCDN {
 			'wpcom' => $_POST['wpcom']);
 		update_option('moecdn_options', $options);
 	}
-	public static function options_notice() {
-		settings_errors();
-	}
 	public static function options_init() {
-		if (isset($_POST['save-options'])) {
+		if (isset($_POST['submit'])) {
 			self::save_options();
 			add_settings_error('moecdn_options', 'moecdn_options-updated', __('Settings saved.'), 'updated');
-		} elseif (isset($_POST['reset-options'])) {
+		} elseif (isset($_POST['reset'])) {
 			self::reset_options();
 			add_settings_error('moecdn_options', 'moecdn_options-reseted', __('Settings reseted.'), 'updated');
 		}
 	}
 	public static function options_menu() {
-		add_options_page('MoeCDN 设置', 'MoeCDN', 'manage_options', basename(__FILE__), array('MoeCDN', 'options_display'));
+		add_options_page('MoeCDN 设置', 'MoeCDN', 'manage_options', 'moecdn', array('MoeCDN', 'options_display'));
 	}
 
 	public static function options_display() {
 		?>
+		
+		<div class="wrap">
+			<h2>MoeCDN 设置</h2>
 
-		<style type="text/css">
-			.clear { clear: both; }
-		</style>
-		
-		<input name="save-options" type="submit" class="save" value="保存设置">
-		<input name="reset-options" type="submit" class="reset" value="重置设置" onclick="return confirm('你确定要重置所有的设置吗？');">
-		
-		<div class="clear"></div>
+			<form method="post" name="moecdn" id="moecdn">
+
+				<table class="form-table">
+					<tbody>
+						<tr><th scope="row">Gravatar</th>
+							<td><label for="gravatar">
+								<input name="gravatar" type="hidden" value="0" />
+								<input name="gravatar" type="checkbox" id="gravatar" value="1" <?php checked(self::$options['gravatar']); ?>>
+								替换 Gravatar 服务器
+							</label></td>
+						</tr>
+						<tr><th scope="row">Google</th>
+							<td><label for="googleapis">
+								<input name="googleapis" type="hidden" value="0" />
+								<input name="googleapis" type="checkbox" id="googleapis" value="1" <?php checked(self::$options['googleapis']); ?>>
+								替换 Google Fonts 和 Google AJAX CDN 服务器
+							</label></td>
+						</tr>
+						<tr><th scope="row">WordPress</th>
+							<td><label for="worg">
+								<input name="worg" type="hidden" value="0" />
+								<input name="worg" type="checkbox" id="worg" value="1" <?php checked(self::$options['worg']); ?>>
+								替换 WordPress Emoji 图片服务器
+							</label></td>
+						</tr>
+						<tr><th scope="row">WP.COM</th>
+							<td><label for="wpcom">
+								<input name="wpcom" type="hidden" value="0" />
+								<input name="wpcom" type="checkbox" id="wpcom" value="1" <?php checked(self::$options['wpcom']); ?>>
+								替换 Jetpack 等 WordPress.com 静态资源服务器
+							</label></td>
+						</tr>
+					</tbody>
+				</table>
+				
+				<p class="submit">
+					<input type="submit" name="submit" id="submit" class="button button-primary" value="保存更改">
+					&nbsp;<input name="reset" type="submit" class="button button-secondary" value="重置设置" onclick="return confirm('你确定要重置所有的设置吗？');">
+				</p>
+			</form>
 
 		<?php
 	}
 }
 
 $MoeCDN = new MoeCDN();
-
