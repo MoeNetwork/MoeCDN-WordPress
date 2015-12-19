@@ -8,7 +8,7 @@
 	Plugin URI: http://http://cdn.moefont.com/
 	Description: Static files CDN which WordPress needs in China.
 	Author: MoeNet Inc.
-	Version: 1.6
+	Version: 1.0
 	Author URI: http://www.moenetwork.com
 */
 
@@ -19,30 +19,24 @@ class MoeCDN {
 		self::$options = get_option('moecdn_options');
 		if (!is_array(self::$options))
 			self::reset_options();
-		self::init();
+		self::hook();
 	}
     
-	protected static function init() {
+	protected static function hook() {
 		add_action('admin_init', array('MoeCDN', 'options_init'));
 		add_action('admin_menu', array('MoeCDN', 'options_menu'));
 		
+		add_action('init', array('MoeCDN', 'buffer_start'), 1);
 		if (is_admin()) {
-			add_action('init', array('MoeCDN', 'buffer_start'), 1);
-			add_action('admin_head', array('MoeCDN', 'buffer_end'), 99999);
-			
+			add_action('in_admin_header', array('MoeCDN', 'buffer_end'), 99999);
 			add_filter('get_avatar', array('MoeCDN', 'replace'));
-			
-			add_action('wp_footer', array('MoeCDN', 'buffer_start'), 1);
-			add_action('shutdown', array('MoeCDN', 'buffer_end'), 99999);
+			add_action('in_admin_footer', array('MoeCDN', 'buffer_start'), 1);
 		} else {
-			add_action('init', array('MoeCDN', 'buffer_start'), 1);
 			add_action('wp_head', array('MoeCDN', 'buffer_end'), 99999);
-			
 			add_filter('get_avatar', array('MoeCDN', 'replace'));
-			
-			add_action('admin_footer', array('MoeCDN', 'buffer_start'), 1);
-			add_action('shutdown', array('MoeCDN', 'buffer_end'), 99999);
+			add_action('wp_footer', array('MoeCDN', 'buffer_start'), 1);
 		}
+		add_action('shutdown', array('MoeCDN', 'buffer_end'), 99999);
 	}
 	
 	// 缓冲替换输出
