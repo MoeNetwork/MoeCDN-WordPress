@@ -5,8 +5,8 @@
  */
 /*
 	Plugin Name: MoeNet Public CDN
-	Plugin URI: http://http://cdn.moefont.com/
-	Description: Static files CDN which WordPress needs in China.
+	Plugin URI: http://cdn.moefont.com/
+	Description: 加速Gravatar/GoogleAPIs/WordPress.com等由于众所周知的原因而在中国无法访问的资源
 	Author: MoeNet Inc.
 	Version: 1.0
 	Author URI: http://www.moenetwork.com
@@ -25,6 +25,7 @@ class MoeCDN {
 	protected static function hook() {
 		add_action('admin_init', array('MoeCDN', 'options_init'));
 		add_action('admin_menu', array('MoeCDN', 'options_menu'));
+		add_filter('plugin_action_links_' . plugin_basename(__FILE__), array('MoeCDN', 'action_links'));
 		
 		add_action('init', array('MoeCDN', 'buffer_start'), 1);
 		if (is_admin()) {
@@ -70,7 +71,14 @@ class MoeCDN {
 		return $content;
 	}
 	
+	// 
+	
 	// 设置页面
+	public static function action_links($links) {
+		$links[] = '<a href="'. esc_url(get_admin_url(null, 'options-general.php?page=moecdn')) .'">' . __('Settings') . '</a>';
+		$links[] = '<a href="http://cdn.moefont.com" target="_blank">支持</a>';
+		return $links;
+	}
 	protected static function reset_options() {
 		self::$options = array(
 			'gravatar' => true,
