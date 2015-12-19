@@ -155,6 +155,7 @@ class MoeCDN {
 					&nbsp;<input name="reset" type="submit" class="button button-secondary" value="重置设置" onclick="return confirm('你确定要重置所有的设置吗？');">
 				</p>
 			</form>
+		</div>
 
 		<?php
 	}
