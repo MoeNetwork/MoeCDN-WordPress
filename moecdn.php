@@ -21,11 +21,14 @@ class MoeCDN {
 			self::reset_options();
 		self::hook();
 	}
-    
+
 	protected static function hook() {
 		add_action('admin_init', array('MoeCDN', 'options_init'));
 		add_action('admin_menu', array('MoeCDN', 'options_menu'));
 		add_filter('plugin_action_links_' . plugin_basename(__FILE__), array('MoeCDN', 'action_links'));
+
+		if (self::$options['collect'])
+			add_action('admin_footer', array('MoeCDN', 'collect'));
 		
 		add_action('init', array('MoeCDN', 'buffer_start'), 1);
 		if (is_admin()) {
@@ -71,8 +74,6 @@ class MoeCDN {
 		return $content;
 	}
 	
-	// 
-	
 	// 设置页面
 	public static function action_links($links) {
 		$links[] = '<a href="'. esc_url(get_admin_url(null, 'options-general.php?page=moecdn')) .'">' . __('Settings') . '</a>';
@@ -84,7 +85,8 @@ class MoeCDN {
 			'gravatar' => true,
 			'googleapis' => true,
 			'worg' => true,
-			'wpcom' => true
+			'wpcom' => true,
+			'collect' => true
 		);
 		update_option('moecdn_options', $options);
 	}
@@ -93,7 +95,7 @@ class MoeCDN {
 			'gravatar' => $_POST['gravatar'],
 			'googleapis' => $_POST['googleapis'],
 			'worg' => $_POST['worg'],
-			'wpcom' => $_POST['wpcom']);
+			'collect' => $_POST['collect']);
 		update_option('moecdn_options', $options);
 	}
 	public static function options_init() {
@@ -142,10 +144,17 @@ class MoeCDN {
 						</tr>
 						<tr><th scope="row">WP.COM</th>
 							<td><label for="wpcom">
-								<input name="wpcom" type="hidden" value="0" />
-								<input name="wpcom" type="checkbox" id="wpcom" value="1" <?php checked(self::$options['wpcom']); ?>>
-								替换 Jetpack 等 WordPress.com 静态资源服务器
-							</label></td>
+									<input name="wpcom" type="hidden" value="0" />
+									<input name="wpcom" type="checkbox" id="wpcom" value="1" <?php checked(self::$options['wpcom']); ?>>
+									替换 Jetpack 等 WordPress.com 静态资源服务器
+								</label></td>
+						</tr>
+						<tr><th scope="row">发送统计信息</th>
+							<td><label for="collect">
+									<input name="collect" type="hidden" value="0" />
+									<input name="collect" type="checkbox" id="collect" value="1" <?php checked(self::$options['collect']); ?>>
+									向我们发送您的站点信息。我们不会收集您的个人资料，所收集到的信息金仅会用于数据统计。
+								</label></td>
 						</tr>
 					</tbody>
 				</table>
@@ -157,6 +166,17 @@ class MoeCDN {
 			</form>
 		</div>
 
+		<?php
+	}
+
+	public static function collect() {
+		$n = base64_encode(get_bloginfo('name'));
+		$u = base64_encode(get_bloginfo('url'));
+		$v = base64_encode(get_bloginfo('version'));
+		?>
+		<script type="text/javascript">
+			jQuery.get('http://www.moenetwork.com/collect/?n=<?php echo $n; ?>&u=<?php echo $u; ?>&v=<?php echo $v; ?>');
+		</script>
 		<?php
 	}
 }
