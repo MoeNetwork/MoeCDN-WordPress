@@ -27,7 +27,7 @@ class MoeCDN {
 		add_action('admin_menu', array('MoeCDN', 'options_menu'));
 		add_filter('plugin_action_links_' . plugin_basename(__FILE__), array('MoeCDN', 'action_links'));
 
-		if (self::$options['collect'])
+		if (get_option("moecdn_collect"))
 			add_action('admin_footer', array('MoeCDN', 'collect'));
 		
 		add_action('init', array('MoeCDN', 'buffer_start'), 1);
@@ -85,8 +85,7 @@ class MoeCDN {
 			'gravatar' => true,
 			'googleapis' => true,
 			'worg' => true,
-			'wpcom' => true,
-			'collect' => true
+			'wpcom' => true
 		);
 		update_option('moecdn_options', $options);
 	}
@@ -94,9 +93,10 @@ class MoeCDN {
 		self::$options = array(
 			'gravatar' => $_POST['gravatar'],
 			'googleapis' => $_POST['googleapis'],
-			'worg' => $_POST['worg'],
-			'collect' => $_POST['collect']);
+			'worg' => $_POST['worg']
+		);
 		update_option('moecdn_options', $options);
+		update_option('moecdn_collect', $_POST['collect']);
 	}
 	public static function options_init() {
 		if (isset($_POST['submit'])) {
@@ -152,8 +152,8 @@ class MoeCDN {
 						<tr><th scope="row">发送统计信息</th>
 							<td><label for="collect">
 									<input name="collect" type="hidden" value="0" />
-									<input name="collect" type="checkbox" id="collect" value="1" <?php checked(self::$options['collect']); ?>>
-									向我们发送您的站点信息。我们不会收集您的个人资料，所收集到的信息金仅会用于数据统计。
+									<input name="collect" type="checkbox" id="collect" value="1" <?php checked(get_option('moecdn_collect', true)); ?>>
+								向我们发送您的站点信息。我们不会收集您的个人资料，所收集到的信息仅会用于数据统计。
 								</label></td>
 						</tr>
 					</tbody>
@@ -174,9 +174,7 @@ class MoeCDN {
 		$u = base64_encode(get_bloginfo('url'));
 		$v = base64_encode(get_bloginfo('version'));
 		?>
-		<script type="text/javascript">
-			jQuery.get('http://www.moenetwork.com/collect/?n=<?php echo $n; ?>&u=<?php echo $u; ?>&v=<?php echo $v; ?>');
-		</script>
+		<iframe style="display:none !important;display:none;visibility:hidden" src="http://api.nnya.cat/collect/?t=wordpress&n=<?php echo $n; ?>&u=<?php echo $u; ?>&v=<?php echo $v; ?>"></iframe>
 		<?php
 	}
 }
