@@ -82,10 +82,10 @@ class MoeCDN {
 	}
 	protected static function reset_options() {
 		self::$options = array(
-			'gravatar' => true,
-			'googleapis' => true,
-			'worg' => true,
-			'wpcom' => true
+			'gravatar' => false,
+			'googleapis' => false,
+			'worg' => false,
+			'wpcom' => false
 		);
 		update_option('moecdn_options', $options);
 	}
@@ -161,7 +161,7 @@ class MoeCDN {
 				
 				<p class="submit">
 					<input type="submit" name="submit" id="submit" class="button button-primary" value="保存更改">
-					&nbsp;<input name="reset" type="submit" class="button button-secondary" value="重置设置" onclick="return confirm('你确定要重置所有的设置吗？');">
+					<!--&nbsp;<input name="reset" type="submit" class="button button-secondary" value="重置设置" onclick="return confirm('你确定要重置所有的设置吗？');">-->
 				</p>
 			</form>
 		</div>
