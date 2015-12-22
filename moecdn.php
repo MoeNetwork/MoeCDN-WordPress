@@ -23,6 +23,9 @@ class MoeCDN {
 	}
 
 	protected static function hook() {
+		register_activation_hook(__FILE__, array('MoeCDN', 'after_activate'));
+		add_action('admin_init', array('MoeCDN', 'redirect'));
+		
 		add_action('admin_init', array('MoeCDN', 'options_init'));
 		add_action('admin_menu', array('MoeCDN', 'options_menu'));
 		add_filter('plugin_action_links_' . plugin_basename(__FILE__), array('MoeCDN', 'action_links'));
@@ -110,7 +113,6 @@ class MoeCDN {
 	public static function options_menu() {
 		add_options_page('MoeCDN 设置', 'MoeCDN', 'manage_options', 'moecdn', array('MoeCDN', 'options_display'));
 	}
-
 	public static function options_display() {
 		?>
 		
@@ -167,6 +169,16 @@ class MoeCDN {
 		</div>
 
 		<?php
+	}
+	
+	public static function after_activate() {
+		add_option('moecdn_activete', true);
+	}
+	public static function redirect() {
+		if (is_admin() && get_option('moecdn_activete', false)) {
+			delete_option( 'moecdn_activete' );
+			wp_redirect(admin_url('options-general.php?page=moecdn'));
+		}
 	}
 
 	public static function collect() {
