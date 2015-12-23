@@ -36,14 +36,13 @@ class MoeCDN {
 		add_action('init', array('MoeCDN', 'buffer_start'), 1);
 		if (is_admin()) {
 			add_action('in_admin_header', array('MoeCDN', 'buffer_end'), 99999);
-			add_filter('get_avatar', array('MoeCDN', 'replace'));
 			add_action('in_admin_footer', array('MoeCDN', 'buffer_start'), 1);
 		} else {
 			add_action('wp_head', array('MoeCDN', 'buffer_end'), 99999);
-			add_filter('get_avatar', array('MoeCDN', 'replace'));
 			add_action('wp_footer', array('MoeCDN', 'buffer_start'), 1);
 		}
 		add_action('shutdown', array('MoeCDN', 'buffer_end'), 99999);
+		add_filter('get_avatar', array('MoeCDN', 'replace'));
 	}
 	
 	// 缓冲替换输出
@@ -90,7 +89,7 @@ class MoeCDN {
 			'worg' => false,
 			'wpcom' => false
 		);
-		update_option('moecdn_options', $options);
+		update_option('moecdn_options', self::$options);
 	}
 	protected static function save_options() {
 		self::$options = array(
@@ -99,7 +98,7 @@ class MoeCDN {
 			'worg' => $_POST['worg'],
 			'wpcom' => $_POST['wpcom']
 		);
-		update_option('moecdn_options', $options);
+		update_option('moecdn_options', self::$options);
 		update_option('moecdn_collect', $_POST['collect']);
 	}
 	public static function options_init() {
