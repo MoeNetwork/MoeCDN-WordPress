@@ -96,7 +96,8 @@ class MoeCDN {
 		self::$options = array(
 			'gravatar' => $_POST['gravatar'],
 			'googleapis' => $_POST['googleapis'],
-			'worg' => $_POST['worg']
+			'worg' => $_POST['worg'],
+			'wpcom' => $_POST['wpcom']
 		);
 		update_option('moecdn_options', $options);
 		update_option('moecdn_collect', $_POST['collect']);
