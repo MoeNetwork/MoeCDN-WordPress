@@ -55,8 +55,7 @@ class MoeCDN {
 	// 替换内容
 	public static function replace($content) {
 		if (self::$options['gravatar']) {
-			$content = str_replace(array("//gravatar.com", "//www.gravatar.com", "//0.gravatar.com", "//1.gravatar.com", "//2.gravatar.com", "//cn.gravatar.com"), "//gravatar.moefont.com", $content);
-			$content = str_replace(array("//secure.gravatar.com"), "//gravatar-ssl.moefont.com", $content);
+			$content = str_replace(array("//gravatar.com", "//secure.gravatar.com", "//www.gravatar.com", "//0.gravatar.com", "//1.gravatar.com", "//2.gravatar.com", "//cn.gravatar.com"), "//gravatar.moefont.com", $content);
 		}
 		
 		if (self::$options['googleapis']) {
