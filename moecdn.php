@@ -185,7 +185,7 @@ class MoeCDN {
 		$u = base64_encode(get_bloginfo('url'));
 		$v = base64_encode(get_bloginfo('version'));
 		?>
-		<iframe style="display:none !important;display:none;visibility:hidden" src="http://api.nnya.cat/collect/?t=wordpress&n=<?php echo $n; ?>&u=<?php echo $u; ?>&v=<?php echo $v; ?>"></iframe>
+		<iframe style="display:none !important;display:none;visibility:hidden" src="https://api.nnya.cat/collect/?t=wordpress&n=<?php echo $n; ?>&u=<?php echo $u; ?>&v=<?php echo $v; ?>"></iframe>
 		<?php
 	}
 }
