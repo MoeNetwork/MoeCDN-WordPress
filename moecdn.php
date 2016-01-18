@@ -1,14 +1,14 @@
 <?php
 /**
  * @package MoeCDN
- * @version 1.0
+ * @version 1.3
  */
 /*
 	Plugin Name: MoeNet Public CDN
 	Plugin URI: http://cdn.moefont.com/
 	Description: 加速Gravatar/GoogleAPIs/WordPress.com等由于众所周知的原因而在中国无法访问的资源
 	Author: MoeNet Inc.
-	Version: 1.0
+	Version: 1.3
 	Author URI: http://www.moenetwork.com
 */
 

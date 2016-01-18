@@ -5,9 +5,7 @@ MoeNet Public libraries CDN plugin for WordPress.
 
 ### Gravatar 
 
-非SSL: *.gravatar.com -> gravatar.moefont.com
-
-SSL: secure.gravatar.com -> gravatar-ssl.moefont.com
+*.gravatar.com -> gravatar.moefont.com
 
 ### GoogleAPIs
 
