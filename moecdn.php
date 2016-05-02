@@ -1,24 +1,25 @@
 <?php
 /**
  * @package MoeCDN
- * @version 1.3
+ * @version 1.4
  */
 /*
 	Plugin Name: MoeNet Public CDN
 	Plugin URI: http://cdn.moefont.com/
 	Description: 加速Gravatar/GoogleAPIs/WordPress.com等由于众所周知的原因而在中国无法访问的资源
 	Author: MoeNet Inc.
-	Version: 1.3
+	Version: 1.4
 	Author URI: http://www.moenetwork.com
 */
 
 class MoeCDN {
 	protected static $options;
 	
-	public function __construct() {
+	public static function init() {
 		self::$options = get_option('moecdn_options');
-		if (!is_array(self::$options))
+		if (!isset(self::$options['isset']) || !self::$options['isset']) {
 			self::reset_options();
+		}
 		self::hook();
 	}
 
@@ -30,8 +31,9 @@ class MoeCDN {
 		add_action('admin_menu', array('MoeCDN', 'options_menu'));
 		add_filter('plugin_action_links_' . plugin_basename(__FILE__), array('MoeCDN', 'action_links'));
 
-		if (get_option("moecdn_collect"))
+		if (get_option("moecdn_collect")) {
 			add_action('admin_footer', array('MoeCDN', 'collect'));
+		}
 		
 		add_action('init', array('MoeCDN', 'buffer_start'), 1);
 		if (is_admin()) {
@@ -70,6 +72,7 @@ class MoeCDN {
 		
 		if (self::$options['wpcom']) {
 			$content = str_replace(array("//s0.wp.com", "//s1.wp.com"), "//cdn.moefont.com/wpcom", $content);
+			$content = str_replace(array("\\/\\/pixel.wp.com"), "\\/\\/cdn.moefont.com\\/pixelwpcom", $content);
 		}
 		
 		return $content;
@@ -86,7 +89,9 @@ class MoeCDN {
 			'gravatar' => false,
 			'googleapis' => false,
 			'worg' => false,
-			'wpcom' => false
+			'wpcom' => false,
+
+			'isset' = true
 		);
 		update_option('moecdn_options', self::$options);
 	}
@@ -95,7 +100,9 @@ class MoeCDN {
 			'gravatar' => $_POST['gravatar'],
 			'googleapis' => $_POST['googleapis'],
 			'worg' => $_POST['worg'],
-			'wpcom' => $_POST['wpcom']
+			'wpcom' => $_POST['wpcom'],
+
+			'isset' = true
 		);
 		update_option('moecdn_options', self::$options);
 		update_option('moecdn_collect', $_POST['collect']);
@@ -190,4 +197,4 @@ class MoeCDN {
 	}
 }
 
-$MoeCDN = new MoeCDN();
+MoeCDN::init();
