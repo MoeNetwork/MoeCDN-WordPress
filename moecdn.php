@@ -91,7 +91,7 @@ class MoeCDN {
 			'worg' => false,
 			'wpcom' => false,
 
-			'isset' = true
+			'isset' => true
 		);
 		update_option('moecdn_options', self::$options);
 	}
@@ -102,7 +102,7 @@ class MoeCDN {
 			'worg' => $_POST['worg'],
 			'wpcom' => $_POST['wpcom'],
 
-			'isset' = true
+			'isset' => true
 		);
 		update_option('moecdn_options', self::$options);
 		update_option('moecdn_collect', $_POST['collect']);
