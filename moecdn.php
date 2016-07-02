@@ -1,20 +1,20 @@
 <?php
 /**
  * @package MoeCDN
- * @version 1.4
+ * @version 1.5
  */
 /*
 	Plugin Name: MoeNet Public CDN
 	Plugin URI: http://cdn.moefont.com/
 	Description: 加速Gravatar/GoogleAPIs/WordPress.com等由于众所周知的原因而在中国无法访问的资源
 	Author: MoeNet Inc.
-	Version: 1.4
+	Version: 1.5
 	Author URI: http://www.moenetwork.com
 */
 
 class MoeCDN {
 	protected static $options;
-	
+
 	public static function init() {
 		self::$options = get_option('moecdn_options');
 		if (!isset(self::$options['isset']) || !self::$options['isset']) {
@@ -26,7 +26,7 @@ class MoeCDN {
 	protected static function hook() {
 		register_activation_hook(__FILE__, array('MoeCDN', 'after_activate'));
 		add_action('admin_init', array('MoeCDN', 'redirect'));
-		
+
 		add_action('admin_init', array('MoeCDN', 'options_init'));
 		add_action('admin_menu', array('MoeCDN', 'options_menu'));
 		add_filter('plugin_action_links_' . plugin_basename(__FILE__), array('MoeCDN', 'action_links'));
@@ -34,50 +34,43 @@ class MoeCDN {
 		if (get_option("moecdn_collect")) {
 			add_action('admin_footer', array('MoeCDN', 'collect'));
 		}
-		
-		add_action('init', array('MoeCDN', 'buffer_start'), 1);
-		if (is_admin()) {
-			add_action('in_admin_header', array('MoeCDN', 'buffer_end'), 99999);
-			add_action('in_admin_footer', array('MoeCDN', 'buffer_start'), 1);
-		} else {
-			add_action('wp_head', array('MoeCDN', 'buffer_end'), 99999);
-			add_action('wp_footer', array('MoeCDN', 'buffer_start'), 1);
-		}
-		add_action('shutdown', array('MoeCDN', 'buffer_end'), 99999);
-		add_filter('get_avatar', array('MoeCDN', 'replace'));
+
+		add_action('init', array('MoeCDN', 'buffer_start'));
+		add_filter('get_avatar', array('MoeCDN', 'replace_gravatar'));
 	}
-	
+
 	// 缓冲替换输出
 	public static function buffer_start() {
 		ob_start(array('MoeCDN', 'replace'));
 	}
-	public static function buffer_end() {
-		ob_end_flush();
-	}
 	// 替换内容
 	public static function replace($content) {
-		if (self::$options['gravatar']) {
-			$content = str_replace(array("//gravatar.com", "//secure.gravatar.com", "//www.gravatar.com", "//0.gravatar.com", "//1.gravatar.com", "//2.gravatar.com", "//cn.gravatar.com"), "//gravatar.moefont.com", $content);
-		}
-		
 		if (self::$options['googleapis']) {
-			$content = str_replace(array("//fonts.googleapis.com"), "//cdn.moefont.com/fonts", $content);
-			$content = str_replace(array("//ajax.googleapis.com"), "//cdn.moefont.com/ajax", $content);
+			$content = preg_replace("/(<link.+?href=[\"'](http:|https:|))\/\/fonts.googleapis.com\/css(\?[0-9A-Za-z=&#;_%\.\-\+\|]+[\"'].*?>)/i", "$1//cdn.moefont.com/fonts/css$3", $content);
+			$content = preg_replace("/(<link.+?href=[\"'](http:|https:|))\/\/ajax.googleapis.com\/([0-9A-Za-z._\-\/]+[\"'].*?>)/i", "$1//ajax.googleapis.com/$3", $content);
+			$content = preg_replace("/(<script.+?src=[\"'](http:|https:|))\/\/ajax.googleapis.com\/([0-9A-Za-z._\-\/]+[\"'].*?>)/i", "$1//ajax.googleapis.com/$3", $content);
 		}
-		
+
 		if (self::$options['worg']) {
 			$content = str_replace(array("\\/\\/s.w.org"), "\\/\\/cdn.moefont.com\\/worg", $content);
 			$content = str_replace(array("//s.w.org"), "//cdn.moefont.com/worg", $content);
 		}
-		
+
 		if (self::$options['wpcom']) {
 			$content = str_replace(array("//s0.wp.com", "//s1.wp.com"), "//cdn.moefont.com/wpcom", $content);
 			$content = str_replace(array("\\/\\/pixel.wp.com"), "\\/\\/cdn.moefont.com\\/pixelwpcom", $content);
 		}
-		
+
 		return $content;
 	}
-	
+	// 替换头像
+	public static function replace_gravatar($avatar) {
+		if (self::$options['gravatar']) {
+			$avatar = str_replace(array("//gravatar.com", "//secure.gravatar.com", "//www.gravatar.com", "//0.gravatar.com", "//1.gravatar.com", "//2.gravatar.com", "//cn.gravatar.com"), "//gravatar.moefont.com", $content);
+		}
+		return $avatar;
+	}
+
 	// 设置页面
 	public static function action_links($links) {
 		$links[] = '<a href="'. esc_url(get_admin_url(null, 'options-general.php?page=moecdn')) .'">' . __('Settings') . '</a>';
@@ -121,7 +114,7 @@ class MoeCDN {
 	}
 	public static function options_display() {
 		?>
-		
+
 		<div class="wrap">
 			<h2>MoeCDN 设置</h2>
 
@@ -176,7 +169,7 @@ class MoeCDN {
 
 		<?php
 	}
-	
+
 	public static function after_activate() {
 		add_option('moecdn_activete', true);
 	}
