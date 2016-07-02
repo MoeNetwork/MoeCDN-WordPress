@@ -66,7 +66,7 @@ class MoeCDN {
 	// 替换头像
 	public static function replace_gravatar($avatar) {
 		if (self::$options['gravatar']) {
-			$avatar = str_replace(array("//gravatar.com", "//secure.gravatar.com", "//www.gravatar.com", "//0.gravatar.com", "//1.gravatar.com", "//2.gravatar.com", "//cn.gravatar.com"), "//gravatar.moefont.com", $content);
+			$avatar = str_replace(array("//gravatar.com", "//secure.gravatar.com", "//www.gravatar.com", "//0.gravatar.com", "//1.gravatar.com", "//2.gravatar.com", "//cn.gravatar.com"), "//gravatar.moefont.com", $avatar);
 		}
 		return $avatar;
 	}
